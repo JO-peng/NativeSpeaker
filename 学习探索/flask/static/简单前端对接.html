@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Axios Form Submission</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    .imgSize {
+      max-width: 300px; /* 设置图片的最大宽度为300像素 */
+      max-height: 200px; /* 设置图片的最大高度为200像素 */
+      width: auto; /* 保持图片的原始宽高比 */
+      height: auto; /* 保持图片的原始宽高比 */
+    }
+
+
+  </style>
+</head>
+<body>
+  <h1>Submit Form</h1>
+  <form id="dataForm" enctype="multipart/form-data">
+    <input type="text" name="text" id="textInput" placeholder="Enter text"><br><br>
+    <input type="file" name="image" id="imageInput"><br><br>
+    <button type="button" onclick="submitForm()">Submit</button>
+  </form>
+
+
+<!-- 用于显示返回数据的元素(同界面版本) -->
+<!-- <div id="result">
+  <p>返回的数据：</p>
+  <textarea id="textResult" rows="4" cols="50"></textarea>
+  <br>
+  <img id="imageResult" class="imgSize" src="">
+</div>        
+-->
+
+  <script>
+    function submitForm() {
+      const formData = new FormData();
+      
+      // 获取表单数据
+      const text = document.getElementById('textInput').value;
+      const image = document.getElementById('imageInput').files[0];
+
+      // 将数据附加到 FormData 对象
+      formData.append('text', text);
+      formData.append('image', image);
+
+
+      // 发送 POST 请求到后端
+      axios.post('http://6b0e8ad.r21.cpolar.top/submit', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      .then(response => {
+        console.log('Success:', response.data);
+
+
+      // 打开新窗口并添加标签
+      openResultPage(response);
+
+        // // 将返回的文本信息显示在文本框中
+        // document.getElementById('textResult').value = response.data.text;
+
+        // // 显示图片
+        // if (response.data.image) {
+        //   // 将二进制数据转换为Base64编码
+        //   const imageBase64 = btoa(response.data.image);
+        //   // 在HTML中使用Base64编码的图片
+        //   document.getElementById('imageResult').src = response.data.image;
+        // }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+
+    }
+
+    function openResultPage(response) {
+      // 创建一个新的窗口或标签页来显示结果
+      var newWindow = window.open('', '_blank');
+      // 设置新窗口的标题
+      newWindow.document.title = 'Result';
+
+      // 向新窗口添加样式
+      var style = newWindow.document.createElement('style');
+      style.type = 'text/css';
+      style.innerHTML = '.imgSize { max-width: 300px; max-height: 200px; width: auto; height: auto; }';
+      newWindow.document.head.appendChild(style);
+
+      // 设置新窗口的HTML内容
+      newWindow.document.write('<h1>Result</h1>' +
+      '<textarea id="textResult" rows="4" cols="50">' + response.data.text + '</textarea>' +
+      '<br><img id="imageResult" class="imgSize" src="' + response.data.image + '">');
+
+      // 确保样式被应用，可以通过以下方式强制重新渲染
+      newWindow.document.body.style.display = 'none';
+      newWindow.document.body.offsetHeight; // 强制回流
+      newWindow.document.body.style.display = '';
+    }
+    
+  </script>
+</body>
+</html>

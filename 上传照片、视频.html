@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Native Speaker | 照片视频</title>
+    <link rel="stylesheet" type="text/css" href="css/native导航栏.css">
+    <style>
+        /* 定义上传按钮的样式 */
+        .upload-btn {
+            display: inline-block;
+            width: 750px; /* 方框的宽度 */
+            
+            line-height: 50px; /* 使文字垂直居中 */
+            text-align: center; /* 使文字水平居中 */
+            box-shadow: 5px 5px 10px #d2d2d2;
+            color: #333; /* 文字颜色 */
+            cursor: pointer; /* 鼠标悬停时显示手势 */
+            position: relative; /* 为内部input定位做准备 */
+            overflow: hidden; /* 隐藏内部的input标签 */
+            text-align: center;
+            border-radius: 15px; /* 圆角 */
+            margin-top: 25px;
+        }
+        
+        .upload-btn::after {
+            content: "点击上传照片"; /* 占位符文本 */
+            position: absolute;
+            left: 0;
+            right: 0;
+            color: #c4c4c4;
+            text-align: center;
+            z-index: 1; /* 确保占位符在图片上方 */
+        }
+
+        .upload-btn input[type="file"] {
+            position: absolute; /* 定位到按钮内部 */
+            font-size: 400px; /* 增大点击区域 */
+            right: 0;
+            top: 0;
+            opacity: 0; /* 隐藏input */
+            cursor: pointer; /* 鼠标悬停时显示手势 */
+        }
+
+        #preview{
+            width: 750px; /* 方框的宽度 */
+            height: 420px; /* 方框的高度 */
+        }
+
+        .chat-image {
+            width: 750px; /* 与 .upload-btn 宽度相同 */
+            margin: 0 auto; /* 添加自动边距，使内容居中 */
+            text-align: center; /* 确保图片在容器内水平居中 */
+            margin-bottom: 20px;
+        }
+        .chat-image1 {
+            width: 750px; /* 与 .upload-btn 宽度相同 */
+            margin: 0 auto; /* 添加自动边距，使内容居中 */
+            text-align: center; /* 确保图片在容器内水平居中 */
+    
+        }
+        .chat-video,
+        .chat-image img {
+            width: 750px; /* 方框的宽度 */
+            height: 400px; /* 方框的高度 */
+            max-height: 100%; /* 使图片最大宽度不超过其容器宽度 */
+            max-width: 100%; /* 使图片最大宽度不超过其容器宽度 */
+            height: auto; /* 保持图片的宽高比 */
+            border-radius: 15px; /* 圆角 */
+            object-fit: contain; /* 保持视频的宽高比，同时确保视频完全包含在容器内 */
+      }
+        #originalImageResult {
+        width: 100%; /* 使图片宽度与容器宽度相同 */
+        height: auto; /* 保持图片的纵横比 */
+        max-height: 100%; /* 可选，确保图片高度不超过容器高度 */
+        }
+        .borderr{
+            padding: 10px 20px; /* 增加内边距，使按钮变大 */
+        border: 2px solid #ccc; /* 边框大小和颜色 */
+        border-radius: 25px; /* 圆角边框 */
+        font-size: 16px; /* 字体大小 */
+        color: #000000; /* 文字颜色 */
+        background-color: #ffffff; /* 背景颜色 */
+        cursor: pointer; /* 鼠标悬停时显示手形光标 */
+        outline: none; /* 移除点击时的蓝色边框 */
+        transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s; /* 过渡效果 */
+        margin-right: 10px; /* 按钮之间的间隔 */
+        box-shadow: 5px 5px 10px #d2d2d2;
+    }
+        button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 100%;
+  vertical-align: baseline;
+  font-family: inherit;
+  font-weight: inherit;
+  color: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button:disabled{
+      background-color: #ccc;
+      border:  solid 1px;
+      color: #777;
+    }
+        </style>
+</head>
+<body>
+    <div class="nav">
+        <ul>
+            <li><a href="Native Speaker 首页.html" >首页</a></li>
+            <li><a href="文本、语音.html" target="_self">口语交流制定</a></li>
+            <li><a href="上传照片、视频.html" target="_self">物体英文识别</a></li>
+
+            <li class="end">
+                <a href="#">更多</a>
+                <ul class="dropdown">
+                    <li><a href="#">关于我们</a></li>
+                    <li><a href="#">价格</a></li><br>
+                    <li><a href="#">帮助</a></li>
+
+                </ul>
+            </li>
+        </ul>
+    </div>
+    
+        
+  <div class="fontfirst"><h1>智能 | 物体英文识别</h1>
+    <h2>你传照片、视频，我批注</h2>
+    </div>
+
+    <div class="container">
+        <div class="longbox">
+            <!-- 上传按钮容器 -->
+            <div class="upload-btn" >
+                <input type="file" id="images" accept="image/*" onchange="uploadAndDisplayImage()">
+                 <!-- 原照片显示区域 -->
+                <div id="originalImageContainer" class="chat-image1">
+                <!-- 这里将显示上传的原照片 -->上传照片
+                <img id="originalImageResult" src="" alt="">
+                </div>
+            </div><br>
+            <button id="FakeOpenCamera" class="borderr">点击打开实实时摄像头</button>
+
+             <!-- 后端返回的照片显示在这里 -->
+             <div id="imageContainer" class="chat-image">
+                <!-- 这里将显示图片 -->
+                <img id="imageResult" src="" >
+                <video src="C:\\Users\\26503\\Desktop\\WeChat_20240928203327.mp4"  id="video" style="display: none" class="chat-video"></video>
+            </div>
+        </div>
+    </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+
+let isClosed = true;
+
+const FakeOpenCamera = document.getElementById('FakeOpenCamera');
+FakeOpenCamera.addEventListener("click", function() {                               //打开视频，覆盖照片
+    if (isClosed) {
+        var videoElement = document.getElementById('video')
+    videoElement.style.display = 'block';          
+    // 移除图片元素
+    var imageResult = document.getElementById('imageResult');
+    if (imageResult) {
+        imageResult.style.display = 'none';
+
+    }
+    // 移除图片元素
+    var orimage = document.getElementById('originalImageResult');
+    if (orimage) {
+        orimage.style.display = 'none';
+
+    }
+    var videoElement = document.getElementById('video')
+    videoElement.style.display = 'block';  
+
+    videoElement.style.width = '100%'; // 设置视频宽度为容器宽度
+    videoElement.play();
+    isClosed = false; // 更新状态
+    } else {
+        var videoElement = document.getElementById('video');          //移除视频
+        videoElement.style.display ='none';
+        isClosed = true; // 更新状态
+    }
+    
+});
+
+        function uploadAndDisplayImage() {
+            const images = document.getElementById('images').files[0];
+            
+            var imageResult = document.getElementById('imageResult');      //让照片显示
+            imageResult.style.display = 'block';
+            var orimage = document.getElementById('originalImageResult');
+            orimage.style.display ='block';
+
+            var videoElement = document.getElementById('video');          //移除视频
+            videoElement.style.display ='none';
+            
+
+            var formData = new FormData();
+            //检查图片信息并添加
+            if (images) {
+                formData.append('image', images);
+                // 读取并显示上传的原照片
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                document.getElementById('originalImageResult').src = e.target.result;
+                };
+            reader.readAsDataURL(images); // 确保这一行在定义了 reader.onload 之后
+            } else {
+                formData.append('image', new Blob(), 'empty-image.png'); // 如果为空，则添加一个空的Blob对象
+            }
+            //给一个空的语音
+            formData.append('file', new Blob(), 'empty-audio.mp3'); // 如果为空，则添加一个空的Blob对象
+            // 发送文件到服务器
+            axios.post('http://127.0.0.1:5000/submit', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            .then(response => {
+                console.log('Success:', response.data);
+                // 假设后端返回的照片数据在response.data.image
+                
+                document.getElementById('imageResult').src = response.data.image;
+                
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

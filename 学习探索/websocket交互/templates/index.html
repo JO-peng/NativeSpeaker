@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+  <style>
+    .aad{
+      background-color: #7f3737;
+      height: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="aad"></div>
+  <div id="app">
+    <div v-for="(message, index) in messages" :key="index">
+      <p>{{ message }}</p>
+    </div>
+    <div v-if="messages.length === 0">
+      <p>等待消息...</p>
+    </div>
+  </div>
+  
+
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        messages: [1,2,3],
+      },
+      mounted() {
+      // 连接到 WebSocket 服务
+      this.socket = io("http://localhost:5000", {
+      transports: ['websocket'], //连接方式
+      });
+
+      this.socket.on('connect', () => {
+      console.log('WebSocket connected!');
+      });
+
+      this.socket.on('new_message', (message) => {
+      // 手动加入数据 看看能否渲染
+      // this.messages.push("这是测试的静态消息");
+      this.messages.push(message);  // 将收到的消息添加到消息列表
+      this.$forceUpdate();
+      console.log('Received message:', this.messages);  // 打印收到的消息
+    });
+
+
+
+    },
+      beforeDestroy() {
+        // 断开 WebSocket 连接
+        if (this.socket) {
+          this.socket.disconnect();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

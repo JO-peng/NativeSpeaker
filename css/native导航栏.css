@@ -1,0 +1,137 @@
+*{
+    margin:0px;
+    padding:0px;
+}
+
+body{
+    background: #f2f2f2;
+}
+
+.fontfirst{
+    text-align:center;
+    margin-top: 50px;
+}
+.fontfirst h1 {
+    /* h1 的样式 */
+    margin-bottom: 10px; /* h1 和 h2 之间的距离 */
+    font-size: 50px;
+    font-weight: 800; /* 让 h1 不那么粗 */
+}
+
+.fontfirst h2 {
+    font-weight: 500; 
+    margin-bottom: 80px; /* h2 和 盒子 之间的距离 */
+}
+
+.container {
+    margin-top: -2%;
+    display: flex;           /* 使用 flex 布局 */
+    justify-content: center; /* 在水平方向上居中盒子 */
+    align-items: center;     /* 在垂直方向上居中盒子（如果需要的话） */
+}
+
+.box {
+    width: 450px;             /* 方块宽度 */
+    height: 450px;            /* 方块高度 */
+    box-shadow: 5px 5px 10px #d2d2d2;
+    background-color: #fff;   /* 背景颜色 */
+    margin: 10px;             /* 外边距 */
+    display: inline-block;    /* 内联块级元素，使它们在一行上对齐 */
+    text-align: center;
+  }
+
+  .longbox {
+    width: 930px;             /* 方块宽度 */
+    /* height: 1500px;            方块高度 */
+    box-shadow: 5px 5px 10px #d2d2d2;
+    background-color: #fff;   /* 背景颜色 */
+    margin: 10px;             /* 外边距 */
+    display: inline-block;    /* 内联块级元素，使它们在一行上对齐 */
+    text-align: center;
+  }
+
+  .box img {
+    width: auto;              /* 自动调整图片宽度 */
+    height: auto;             /* 自动调整图片高度 */
+    max-width: 100%;         /* 确保图片不会超出盒子的宽度 */
+    max-height: 100%;        /* 确保图片不会超出盒子的高度 */
+    margin-top: 50%;          /* 设置图片顶部边距为.box高度的一半 */
+    transform: translateY(-50%); /* 使用transform来垂直居中图片 */
+    margin-bottom: -15%;
+  }
+
+#imageResult{
+    margin-top: 15px;
+}
+
+.nav{
+    position: sticky; /* 使导航栏固定在页面上方 */
+    top: 0; /* 设置顶部位置为0 */
+    left: 0; /* 设置左侧位置为0 */
+    z-index: 2;
+    box-shadow: 5px 5px 10px #bbbbbb;
+}
+.nav ul{
+    list-style: none;
+    background: #ffffff;
+    text-align: center;
+    display: flex; /* 使用Flexbox */
+    justify-content: flex-start; /* 将所有li元素对齐到左侧 */
+}
+
+.nav .end{
+    margin-left: auto;
+    margin-right: 0; /* 最后一个li元素不设置右侧间隔 */
+}
+
+
+.nav ul li{
+    display: inline-block;
+    position: relative;
+    margin-right: 70px; /* 增加li元素之间的间隔 */
+}
+
+.nav li a{
+    background: #ffffff;
+    display: block;
+    padding:20px 45px;
+    color: #000000;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.nav .dropdown{
+    margin-top: 3px;
+    margin-right: 3px;
+    text-align: right;
+    color: #ffffff;
+    display: none;
+    background: #ffffff;
+    position: absolute;
+    z-index: 1;
+    border-bottom-left-radius: 10px;
+    top: 100%;
+    right: 0px;
+    width: 170px; /* 增加宽度 */
+    
+}
+
+.nav .dropdown li{
+    text-align: right;
+    margin-right: 0; /* 最后一个li元素不设置右侧间隔 */
+
+}
+.nav li a:hover{
+    color: #4796a8;
+}
+
+.nav ul li:hover ul.dropdown{
+    display: block;
+}
+
+#active{
+    color: #4796a8;
+}
+

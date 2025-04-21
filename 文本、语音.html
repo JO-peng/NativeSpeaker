@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Native Speaker | 文本语音</title>
+    <link rel="stylesheet" type="text/css" href=    "css/文本语音.css">
+    <link rel="stylesheet" type="text/css" href="css/native导航栏.css">
+
+  </head>
+<body>
+  <!-- 导航栏 -->
+  <div class="nav">
+        <ul>
+            <li><a href="Native Speaker 首页.html" >首页</a></li>
+            <li><a href="文本、语音.html" target="_self">口语交流制定</a></li>
+            <li><a href="上传照片、视频.html" target="_self">物体英文识别</a></li>
+
+            <li class="end">
+                <a href="#">更多</a>
+                <ul class="dropdown">
+                    <li><a href="#">关于我们</a></li>
+                    <li><a href="#">价格</a></li><br>
+                    <li><a href="#">帮助</a></li>
+
+                </ul>
+            </li>
+        </ul>
+  </div>
+    
+  <div class="fontfirst"><h1>智能 | 口语交流制定</h1>
+    <h2>根据语境描述、模糊搜查、语音提问，总能地道回答</h2>
+    </div>
+
+  <div class="body" id="app">
+    <!-- 主体区域 -->
+
+    <section id="todoapp">
+    
+    <!-- 输入框 -->
+    <header class="header">
+      <input v-model="inputValue" @keyup.enter="handleSubmit" autofocus="autofocus" autocomplete="off" placeholder="请输入咨询内容"
+        class="new-todo" />                                 <!-- 收集文本 -->   
+        <!-- <input type="file" id="zhaopian" accept="image/*">  收集照片 -->
+    </header>
+
+    <!-- 列表区域 -->
+    <section class="main">
+      <ul class="todo-list">
+        <li class="todo" v-for="(item,index) in list">
+          <div class="view">
+            <span class="index">{{ index+1 }}.</span>
+            <label>{{ item }}</label>
+            <button class="destroy" @click="remove(index)"></button>
+          </div>
+        </li>
+      </ul>
+    </section>
+    <!-- 统计和清空 -->
+    <footer class="footer" v-show="list.length">
+      <span class="todo-count" >
+        <strong>{{ list.length }}</strong> words left
+      </span>
+      <button class="clear-completed" @click="clear">
+        Clear
+      </button>
+    </footer>
+    </section>
+    <!-- 底部 -->
+    <br>        <!-- 收集发音偏好 -->                                                    
+    <input v-model="inputValueX"  autofocus="autofocus" autocomplete="off" placeholder="你想要的发音" class="in2"/>       <br>
+    <!-- 收集语音 -->
+        
+        <button id="start" class="borderr">开始录制</button>
+        <button id="stop" class="borderr" disabled>停止录制</button>
+        <!-- 提交按钮（发送给后端） -->
+        <button type="button"  class="borderr" @click="handleSubmit">Submit</button>
+    
+      <!-- <audio id="audio" controls ></audio>      暂不播放，后续需要可以打开 -->
+
+     <!-- 同界面版本，收到后端返回之后：根据实际数据渲染 多条 数据 -->
+    <section id="results">
+      <div v-for="(text, index) in results_text" :key="index" class="chat-message">
+        <!-- 显示文本 -->
+        <div id="chatBox" class="chat-message">
+          <p>{{ text }}</p>
+        </div>
+        <!-- 显示音频 -->
+        <audio controls>
+          <source :src="results_audio[index]" type="audio/mp3">
+        </audio> <!-- 渲染音频 -->
+      </div>
+    </section>
+    
+    <div id="ai-response" class="chat-message" v-if="aiResponse">
+      <div class="message-bubble" v-html="renderMarkdown(aiResponse)"></div>
+    </div>
+    
+    <div v-else-if="isLoading" class="loading-animation">
+      <!-- 加载动画（三个小圆点） -->
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    </div>
+</div>        
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+  var app = new Vue({
+    el:"#app",
+    data:{
+      list:[],
+      inputValue:"",
+      inputValueX:"",
+      prompt:"",
+      aiResponse: null, // 新增的AI回复数据
+      isLoading: false, // 新增加载状态
+      },
+            methods:{
+              renderMarkdown(text) {
+                return marked.parse(text || ''); // 将 Markdown 转为 HTML
+              },
+              handleSubmit() {
+                this.add(); // 执行原有add逻辑
+                submitForm(); // 直接调用全局submitForm函数
+              },
+              add:function(){
+                this.list.push(this.inputValue);
+                this.prompt = "帮我评估一下下面我说的句子的要怎么发音（英式和美式和其他等发音）：" + this.inputValue;
+                this.sendToAI(this.prompt); // 发送到AI 
+                this.inputValue = " ";
+              },
+              remove:function(index){
+                this.list.splice(index,1);
+              },
+              clear:function(){
+                this.list= [];            //简单粗暴，直接把数组变为空即可
+              },
+              sendToAI: async function(input) {
+                  const apiKey = 'sk-1293377df9b2444d9bf8fec5625af9fe'; 
+                  const apiUrl = 'https://api.deepseek.com/v1/chat/completions';
+                  this.isLoading = true; // 开始加载
+                  this.aiResponse = ""; // 清空之前的回复
+                  
+                  try {
+                    const response = await fetch(apiUrl, {
+                      method: 'POST',
+                      headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        model: "deepseek-chat",
+                        messages: [{ role: "user", content: input }],
+                        stream: true,
+                      }),
+                    });
+
+                    if (!response.ok) {
+                      throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+
+                    const readChunk = async () => {
+                      const { done, value } = await reader.read();
+                      if (done) return;
+
+                      const chunk = decoder.decode(value);
+                      const lines = chunk.split('\n').filter(line => line.trim());
+
+                      lines.forEach(line => {
+                        if (line.startsWith('data:')) {
+                          try {
+                            const data = JSON.parse(line.replace('data:', ''));
+                            if (data.choices?.[0]?.delta?.content) {
+                              this.aiResponse += data.choices[0].delta.content;
+                            }
+                          } catch (e) {
+                            console.error("Failed to parse chunk:", e);
+                          }
+                        }
+                      });
+
+                      readChunk(); // 继续读取下一块
+                    };
+
+                    readChunk();
+                  } catch (error) {
+                    console.error("Error:", error);
+                    this.aiResponse = "Error: Failed to fetch response.";
+                  }
+                }
+            }
+        })
+         var resultsApp = new Vue({
+         el: '#results',
+           data: {
+           results_text:[],
+           results_audio:[]
+         },
+         methods: {
+        updateResults(response) {
+          // 使用 push 方法添加新元素到数组中
+          this.results_text.push(response.data.text);
+          this.results_audio.push(response.data.audio);
+        }
+  }
+        });
+//录音收集
+
+  //获取按钮元素
+  const startButton = document.getElementById('start');
+  const stopButton = document.getElementById('stop');
+  const audioElement = document.getElementById('audio');
+
+  let audioFile;
+
+// **获取用户的媒体设备（麦克风）
+navigator.mediaDevices.getUserMedia({ audio: true })
+.then(stream => {
+    let mediaRecorder = createMediaRecorder(stream);
+
+    function createMediaRecorder(stream) {
+      const mediaRecorder = new MediaRecorder(stream);
+      let chunks = [];
+
+      // 当有数据时触发
+      mediaRecorder.ondataavailable = function(e) {
+        chunks.push(e.data);
+      };
+
+      // 录制结束时触发
+      mediaRecorder.onstop = function() {
+        const blob = new Blob(chunks, { 'type' : 'audio/mp3; codecs=opus' });
+        chunks = [];
+        const audioURL = URL.createObjectURL(blob);
+        // audioElement.src = audioURL;   //其实可以一步到位                     //暂不播放，后续需要可以打开
+
+         // 创建一个包含 Blob 的 File 对象（为后续发送给后端铺垫）
+        audioFile = new File([blob], "recording.mp3", { type: "audio/mp3" });
+
+       playAudio();
+
+        // 停止媒体流
+        //stream.getTracks().forEach(track => track.stop());
+        //这里不要停止，不然就没有stream了，下次点击时候上面代码都不会执行了
+      };
+
+      return mediaRecorder;
+    }
+
+//暂不自动播放，后续需要可以打开
+
+    // // 尝试播放音频的函数
+    // function playAudio() {
+    //   // 检查音频是否可以立即播放
+    //   audioElement.play().then(() => {
+    //     console.log('音频播放成功！');
+    //   }).catch(error => {
+    //     // 如果播放失败，监听用户的交互事件后重试播放
+    //     console.error('播放音频失败，将在用户交互后重试:', error);
+    //     // 监听用户交互事件
+    //     document.body.addEventListener('click', function playListener() {
+    //       audioElement.play().then(() => {
+    //         console.log('音频播放成功！');
+    //       }).catch(error => {
+    //         console.error('播放音频失败:', error);
+    //       });
+    //       // 移除事件监听器，避免重复添加
+    //       document.body.removeEventListener('click', playListener);
+    //     });
+    //   });
+    // }
+
+    // 绑定开始录制的按钮
+    startButton.addEventListener('click', () => {
+      startButton.disabled = true;
+      stopButton.disabled = false;
+      mediaRecorder.start();
+    });
+
+    // 绑定停止录制的按钮
+    stopButton.addEventListener('click', () => {
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      mediaRecorder.stop();
+    });
+  })
+  .catch(error => {
+    console.error('获取用户媒体设备失败:', error);
+  });
+
+
+function submitForm(){
+
+//存储数据到formData
+
+  // 获取按钮元素
+
+const inputValue = app.inputValue; // 文本信息拉过来
+// const audioBlob = audioElement.src; // 音频Blob对象  //这里不用该功能，后续需要可以打开
+
+// 创建一个FormData对象来装载数据，一起发axios
+const formData = new FormData();
+
+// 检查文本信息并添加
+if (inputValue) {
+    formData.append('text', inputValue);
+  } else {
+    formData.append('text', ' '); // 如果为空，则添加空字符串
+  }
+
+//添加语音信息
+//formData.append('file', audioFile);            //这里不用该功能，后续需要可以打开
+
+// 检查语音信息并添加
+  if (audioFile) {
+    formData.append('file', audioFile);
+  } else {
+    formData.append('file', new Blob(), 'empty-audio.mp3'); // 如果为空，则添加一个空的Blob对象
+  }
+
+//给一个空照片
+
+    formData.append('image', new Blob(), 'empty-image.png'); // 如果为空，则添加一个空的Blob对象
+
+    // 发送 POST 请求到后端
+
+    axios.post('https://natispeaker.chainpray.top/submit', formData, {
+         headers: {
+           'Content-Type': 'multipart/form-data'
+         }
+       })
+      .then(response => {
+       console.log('Success:', response.data);
+      //var parsedData = JSON.parse(response.data);   // 解析JSON字符串(不用，我拿到的就是对象)
+
+      resultsApp.updateResults(response);     //直接放到vue里面用this
+      // this.results_text[0] = response.data.text;                //只能更新整个数组，这样vue检测不到
+      // this.results_audio[0] = response.data.audio;
+      app.isLoading = false;  // 添加这行
+      })
+      .catch(error => {
+      console.error('Error:', error);
+      });
+      if (inputValue != ' '){
+      app.add();
+      }
+      
+}
+
+    </script>
+</body>
+</html>

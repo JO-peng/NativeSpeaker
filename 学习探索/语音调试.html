@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Native Speaker test</title>
+    <link rel="stylesheet" type="text/css" href="C:\Users\26503\Desktop\学习\编程\前端\css\Native Speaker.css" />
+  <style>
+    .borderr{
+      border: solid 1px;
+      padding: 5px;
+    }
+
+    button:disabled{
+      background-color: #ccc;
+      border:  solid 1px;
+      color: #777;
+    }
+  </style>
+  </head>
+<body>
+    <!-- 主体区域 -->
+  <section id="todoapp">
+    <!-- 输入框 -->
+    <header class="header">
+      <h1>Native-Speaker</h1>
+      <input v-model="inputValue" @keyup.enter="add" autofocus="autofocus" autocomplete="off" placeholder="请输入内容"
+        class="new-todo" />                                 <!-- 收集文本 -->   
+        <input type="file" id="zhaopian" accept="image/*">  <!-- 收集照片 -->
+    </header>
+    <!-- 列表区域 -->
+    <section class="main">
+      <ul class="todo-list">
+        <li class="todo" v-for="(item,index) in list">
+          <div class="view">
+            <span class="index">{{ index+1 }}.</span>
+            <label>{{ item }}</label>
+            <button class="destroy" @click="remove(index)"></button>
+          </div>
+        </li>
+      </ul>
+    </section>
+    <!-- 统计和清空 -->
+    <footer class="footer" v-show="list.length">
+      <span class="todo-count" >
+        <strong>{{ list.length }}</strong> words left
+      </span>
+      <button class="clear-completed" @click="clear">
+        Clear
+      </button>
+    </footer>
+  </section>
+  <!-- 底部 -->
+  <br>                                                            <!-- 收集语音 -->
+        <div><audio id="audio" controls ></audio><br></div>
+        <button id="start" class="borderr">开始录制</button>
+        <button id="stop" class="borderr" disabled>停止录制</button>
+        
+
+        <!-- 提交按钮（发送给后端） -->
+        <button type="button" onclick="submitForm()" class="borderr" @click="add">Submit</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+        var app = new Vue({
+            el:"#todoapp",
+            data:{
+              list:[],
+              inputValue:" ",
+            },
+            methods:{
+              add:function(){
+                this.list.push(this.inputValue);               //注意这一套逻辑，先双向绑定，然后push进列表！
+                this.inputValue = " ";
+              },
+              remove:function(index){
+                this.list.splice(index,1);
+              },
+              clear:function(){
+                this.list= [];            //简单粗暴，直接把数组变为空即可
+              }
+            }
+        })
+        
+//录音收集
+
+  //获取按钮元素
+  const startButton = document.getElementById('start');
+  const stopButton = document.getElementById('stop');
+  const audioElement = document.getElementById('audio');
+
+  let audioFile;
+
+// 获取用户的媒体设备（麦克风）
+navigator.mediaDevices.getUserMedia({ audio: true })
+.then(stream => {
+    let mediaRecorder = createMediaRecorder(stream);
+
+    function createMediaRecorder(stream) {
+      const mediaRecorder = new MediaRecorder(stream);
+      let chunks = [];
+
+      // 当有数据时触发
+      mediaRecorder.ondataavailable = function(e) {
+        chunks.push(e.data);
+      };
+
+      // 录制结束时触发
+      mediaRecorder.onstop = function() {
+        const blob = new Blob(chunks, { 'type' : 'audio/mp3; codecs=opus' });
+        chunks = [];
+        const audioURL = URL.createObjectURL(blob);
+        audioElement.src = audioURL;   //其实可以一步到位
+
+         // 创建一个包含 Blob 的 File 对象（为后续发送给后端铺垫）
+        audioFile = new File([blob], "recording.mp3", { type: "audio/mp3" });
+
+        playAudio();
+
+        // 停止媒体流
+        //stream.getTracks().forEach(track => track.stop());
+        //这里不要停止，不然就没有stream了，下次点击时候上面代码都不会执行了
+      };
+
+      return mediaRecorder;
+    }
+
+    // 尝试播放音频的函数
+    function playAudio() {
+  // 检查音频是否可以立即播放
+  audioElement.play().then(() => {
+    console.log('音频播放成功！');
+  }).catch(error => {
+    // 如果播放失败，监听用户的交互事件后重试播放
+    console.error('播放音频失败，将在用户交互后重试:', error);
+    // 监听用户交互事件
+    document.body.addEventListener('click', function playListener() {
+      audioElement.play().then(() => {
+        console.log('音频播放成功！');
+      }).catch(error => {
+        console.error('播放音频失败:', error);
+      });
+      // 移除事件监听器，避免重复添加
+      document.body.removeEventListener('click', playListener);
+    });
+  });
+}
+
+    // 绑定开始录制的按钮
+    startButton.addEventListener('click', () => {
+      startButton.disabled = true;
+      stopButton.disabled = false;
+      mediaRecorder.start();
+    });
+
+    // 绑定停止录制的按钮
+    stopButton.addEventListener('click', () => {
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      mediaRecorder.stop();
+    });
+  })
+  .catch(error => {
+    console.error('获取用户媒体设备失败:', error);
+  });
+
+  //把拿到的数据存储起来，准备一起axios发送给后端
+
+//原本想着一上传就下载下来，然后一起打包发送给后端，但是忘了这里是客户端，这样写下载操作
+//是在他的本地上下载，所以应该不用下载，直接获取到信息，发送即可
+// zhaopianFile.onchange = function(e){
+//   var file = e.target.files[0];
+//   var a = document.createElement('a');
+//   a.setAttribute('download', '照片.png');
+//   a.href = URL.createObjectURL(file);
+//   a.click();
+// }
+
+function submitForm(){
+
+//存储数据到formData
+
+  // 获取按钮元素
+  const images = document.getElementById('zhaopian').files[0];
+
+const inputValue = app.inputValue; // 文本信息
+// const audioBlob = audioElement.src; // 音频Blob对象
+
+// 创建一个FormData对象
+const formData = new FormData();
+
+// 添加文本信息
+//formData.append('text', inputValue);
+// 检查文本信息并添加
+  if (inputValue) {
+    formData.append('text', inputValue);
+  } else {
+    formData.append('text', ''); // 如果为空，则添加空字符串
+  }
+
+//添加语音信息
+//formData.append('file', audioFile);
+  // 检查语音信息并添加
+  if (audioFile) {
+    formData.append('file', audioFile);
+  } else {
+    formData.append('file', new Blob(), 'empty-audio.mp3'); // 如果为空，则添加一个空的Blob对象
+  }
+
+// 添加图片信息。
+formData.append('image', images);
+//检查图片信息并添加
+if (images) {
+    formData.append('image', images);
+  } else {
+    formData.append('image', new Blob(), 'empty-image.png'); // 如果为空，则添加一个空的Blob对象
+  }
+//添加多个照片。监听图片文件输入框的change事件     这下面这一段应该有问题，会报错
+// images.addEventListener('change', function(e) {
+//       const file = e.target.files; // 获取上传的图片文件
+//       // 添加图片信息到FormData
+//        // 遍历文件并添加到FormData
+//       for (let i = 0; i < file.length; i++) {
+//         formData.append('images[]', file[i]); // 注意这里使用了 'images[]' 作为键名，以允许发送多个文件
+//       }
+//       //console.log(formData);            //怎么里面找不到文本和照片。单纯想看一下储存到哪里了，然后再axios来发送
+//     });                                //算了，先发送过去看看能不能查看到吧
+
+//     // 错误写法：const imageFile = zhaopianFile.files[0]; -->直接对着按钮取数据，必须先监听
+
+
+
+    // 发送 POST 请求到后端
+
+    axios.post('http://127.0.0.1:5000/submit', formData, {
+         headers: {
+           'Content-Type': 'multipart/form-data'
+         }
+       })
+      .then(response => {
+       console.log('Success:', response.data);
+
+        // 打开新窗口并添加标签
+        openResultPage(response);
+      })
+      .catch(error => {
+      console.error('Error:', error);
+      });
+      
+}
+
+function openResultPage(response) {
+      // 创建一个新的窗口或标签页来显示结果
+      var newWindow = window.open('', '_blank');
+      // 设置新窗口的标题
+      newWindow.document.title = 'Result';
+
+      // // 向新窗口添加样式
+      // var style = newWindow.document.createElement('style');
+      // style.type = 'text/css';
+      // style.innerHTML = '.imgSize { max-width: 300px; max-height: 200px; width: auto; height: auto; }';
+      // newWindow.document.head.appendChild(style);
+
+      const css = '.imgSize {max-width: 600px; max-height: 400px; width: auto; height: auto; }'
+      newWindow.document.write(`<style type='text/css'>${css}</style>`);
+
+      // 设置新窗口的HTML内容
+      newWindow.document.write('<h1>Native Speaker</h1>' + ' <div><audio id="audio" controls ><source src="'+ response.data.audio + '" type="audio/mp3">失败</audio><br></div>>' +
+      '<textarea id="textResult" rows="4" cols="50">' + response.data.text + '</textarea>' +
+      '<br><img id="imageResult" class="imgSize" src="' + response.data.image + '">' +
+      '<br><button id="closeButton">返回</button>');
+
+      // // 确保样式被应用，可以通过以下方式强制重新渲染
+      // newWindow.document.body.style.display = 'none';
+      // newWindow.document.body.offsetHeight; // 强制回流
+      // newWindow.document.body.style.display = '';
+
+      // 添加事件监听器，当按钮被点击时关闭窗口
+      newWindow.document.getElementById('closeButton').addEventListener('click', function() {
+        newWindow.close();
+
+      //把list添加，inputValue删去
+      app.add();
+      })
+    }
+    </script>
+</body>
+</html>
