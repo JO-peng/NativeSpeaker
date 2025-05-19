@@ -94,39 +94,41 @@
 </div>        
 
 <!-- 发音评估上拉栏模块（修正class名，确保样式生效） -->
-<div id="pronunciation-panel" class="pronunciation-panel" :class="{ expanded: isPanelExpanded, displayed: isPanelDisplayed }">
+<div id="pronunciation-panel">
   <div class="pronunciation-toggle-button" @click="togglePanel">
     <span v-if="!isPanelExpanded" >发音评估 ▲</span>
     <span v-else>发音评估 ▼</span>
   </div>
-  <div class="pronunciation-info-content" style="display:flex;flex-direction:column;height:65vh;padding-bottom:0;">
-    <!-- 历史内容区，最新在下方，可滚动，内容从上往下堆积 -->
-    <div class="pronunciation-history-content" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;justify-content:flex-start;">
-      <div v-for="(item, idx) in aiHistory" :key="idx" style="margin-bottom:18px;">
-        <div style="font-weight:bold;color:#4a9eff;">{{ item.question }}</div>
-        <audio v-if="item.audio" :src="item.audio" controls style="margin:4px 0;"></audio>
-        <div v-html="renderMarkdown(item.answer)" style="background:#f5f5f5;border-radius:10px;padding:8px 12px;margin-top:4px;font-size:16px;font-weight:bold;"></div>
-      </div>
-      <!-- 当前评估结果 -->
-      <div v-if="aiResponse || isLoading" style="margin-bottom:18px;">
-        <div v-if="inputValue" style="font-weight:bold;color:#4a9eff;">{{ inputValue }}</div>
-        <audio v-if="audioUrl" :src="audioUrl" controls style="margin:4px 0;"></audio>
-        <div v-if="aiResponse" v-html="renderMarkdown(aiResponse)" style="background:#f5f5f5;border-radius:10px;padding:8px 12px;margin-top:4px;font-size:16px;font-weight:bold;"></div>
-        <div v-else-if="isLoading" class="loading-animation">
-          <div class="loading-dot"></div>
-          <div class="loading-dot"></div>
-          <div class="loading-dot"></div>
+  <div  class="pronunciation-panel" :class="{ expanded: isPanelExpanded, displayed: isPanelDisplayed }">
+    <div class="pronunciation-info-content" style="display:flex;flex-direction:column;height:65vh;padding-bottom:0;">
+      <!-- 历史内容区，最新在下方，可滚动，内容从上往下堆积 -->
+      <div class="pronunciation-history-content" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;justify-content:flex-start;">
+        <div v-for="(item, idx) in aiHistory" :key="idx" style="margin-bottom:18px;">
+          <div style="font-weight:bold;color:#4a9eff;">{{ item.question }}</div>
+          <audio v-if="item.audio" :src="item.audio" controls style="margin:4px 0;"></audio>
+          <div v-html="renderMarkdown(item.answer)" style="background:#f5f5f5;border-radius:10px;padding:8px 12px;margin-top:4px;font-size:16px;font-weight:bold;"></div>
+        </div>
+        <!-- 当前评估结果 -->
+        <div v-if="aiResponse || isLoading" style="margin-bottom:18px;">
+          <div v-if="inputValue" style="font-weight:bold;color:#4a9eff;">{{ inputValue }}</div>
+          <audio v-if="audioUrl" :src="audioUrl" controls style="margin:4px 0;"></audio>
+          <div v-if="aiResponse" v-html="renderMarkdown(aiResponse)" style="background:#f5f5f5;border-radius:10px;padding:8px 12px;margin-top:4px;font-size:16px;font-weight:bold;"></div>
+          <div v-else-if="isLoading" class="loading-animation">
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+          </div>
         </div>
       </div>
     </div>
-    <!-- 输入区固定在底部 -->
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0 0 0;margin-top:auto;">
-      <input v-model="inputValue" @keyup.enter="handleSubmit" placeholder="请输入要评估的句子或直接录音" class="pronunciation-message-input" style="flex:1;"/>
-      <button @click="startRecord" :disabled="isRecording" class="borderr">开始录制</button>
-      <button @click="stopRecord" :disabled="!isRecording" class="borderr">结束录制</button>
-      <button @click="handleSubmit" class="pronunciation-send-button">提交评估</button>
-    </div>
   </div>
+  <!-- 输入区固定在底部 -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0 0 0;margin-top:auto;" class="pronunciation-input-area">
+        <input v-model="inputValue" @keyup.enter="handleSubmit" placeholder="请输入要练习的句子或直接录音纠正发音" class="pronunciation-message-input" style="flex:1;"/>
+        <button @click="startRecord" :disabled="isRecording" class="borderr">开始录制</button>
+        <button @click="stopRecord" :disabled="!isRecording" class="borderr">结束录制</button>
+        <button @click="handleSubmit" class="pronunciation-send-button">提交评估</button>
+      </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
